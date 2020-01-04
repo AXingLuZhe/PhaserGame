@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>快速入门phaser</title>
+    </head>
+    <body style="margin: 0;">
+        <script src="js/init.js"></script>
+        <script src="js/phaser.min.js" type="text/javascript" charset="utf-8"></script>
+        <script type="text/javascript">
+            var config = {
+                width:'100',
+                height:'100',
+                renderer:Phaser.AUTO,
+                antialias:true,
+                multiTexture:true,
+                state:{
+                    preload:preload,
+                    create:create,
+                    update:update
+                }
+            }
+            var game = new Phaser.Game(config)
+            var platforms   // 场景
+            var player      // 主角
+            var cursors     // 控制键
+            var bullets     // 奖励
+            var scoreText   // 分数
+            var score = 0   // 分数值
+            function preload(){
+                // 全局开启物理引擎
+                // 物理系统：启动物理系统，再启动想运用的子图形或组
+                // 一旦完成子图形会获得一个新的body属性，它是ArcadePhysics.Body的一个实例。这表示子图形在Phaser的Arcade物理引擎里将被当做一个物理实体
+                game.physics.startSystem(Phaser.Physics.ARCADE)
+
+                game.load.image('star', 'assets/ing.png')
+                game.load.image('ground', 'assets/button_start.png')
+                game.load.image('bullet', 'assets/bullet.png')
+                game.load.spritesheet('player', 'assets/dude.png', 32, 48)
+            }
+            function create(){
+                initScore()
+                initStrage()
+                initPlayer()
+                initStars()
+                cursors = game.input.keyboard.createCursorKeys()       // 利用内建的键盘管理器，创建控制键对象
+            }
+            // update在核心游戏循环的（每帧）都会调用
+            function update(){
+                game.physics.arcade.collide(player, platforms)         // 启动角色的碰撞
+                game.physics.arcade.collide(bullets, platforms)        // 启动奖励与平台的碰撞
+                // 检测角色和星星组里某个星星的重叠，若重叠则传入collectStar函数
+                game.physics.arcade.overlap(player, bullets, collectBullets, null, this)
+                
+                player.body.velocity.x = 0                             // x轴的速度
+                if(cursors.left.isDown) {
+                    player.body.velocity.x = -400
+                    player.animations.play('left')
+                } else if(cursors.right.isDown) {
+                    player.body.velocity.x = 400
+                    player.animations.play('right')
+                } else {
+                    player.animations.stop()
+                    player.frame = 4
+                }
+                if (cursors.up.isDown && player.body.touching.down) {
+                    player.body.velocity.y = -800
+                }
+            }
+        </script>
+    </body>
+</html>
